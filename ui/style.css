@@ -187,3 +187,105 @@ input[type="number"]:focus {
   color: #a0aec0;
   margin-right: 8px;
 }
+
+.settings-inline {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.setting-group-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 180px;
+}
+
+.setting-group-inline label {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.setting-group-inline input[type="number"] {
+  width: 100%;
+}
+
+.help-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 6px;
+  background: #667eea;
+  color: white;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: help;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.help-icon:hover {
+  background: #5568d3;
+  transform: scale(1.1);
+}
+
+.help-icon::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 120%;
+  background: #2d3748;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: normal;
+  white-space: normal;
+  width: 280px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  line-height: 1.4;
+}
+
+.help-icon-left::after {
+  left: -8px;
+}
+
+.help-icon-right::after {
+  right: -8px;
+}
+
+.help-icon::before {
+  content: '';
+  position: absolute;
+  bottom: 105%;
+  border: 6px solid transparent;
+  border-top-color: #2d3748;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.help-icon-left::before {
+  left: 6px;
+}
+
+.help-icon-right::before {
+  right: 6px;
+}
+
+.help-icon:hover::after,
+.help-icon:hover::before {
+  opacity: 1;
+  visibility: visible;
+}

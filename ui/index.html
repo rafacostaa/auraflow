@@ -25,27 +25,43 @@
 
       <div class="settings-card">
         <h3>Settings</h3>
-        <div class="setting-group">
-          <label for="idleThreshold">Idle Threshold (seconds):</label>
-          <input
-            type="number"
-            id="idleThreshold"
-            value="120"
-            min="30"
-            step="10"
-          />
+        <div class="settings-inline">
+          <div class="setting-group-inline">
+            <label for="idleThreshold">
+              Idle Threshold (seconds):
+              <span
+                class="help-icon help-icon-left"
+                data-tooltip="The state when no mouse movement is detected. After 120 seconds (2 minutes) of inactivity, the system enters idle mode and jiggling begins."
+                >?</span
+              >
+            </label>
+            <input
+              type="number"
+              id="idleThreshold"
+              value="120"
+              min="30"
+              step="10"
+            />
+          </div>
+          <div class="setting-group-inline">
+            <label for="jiggleInterval">
+              Jiggle Interval (seconds):
+              <span
+                class="help-icon help-icon-right"
+                data-tooltip="The automatic mouse movement action. Happens every 60 seconds while idle, moving the mouse randomly by ±5 pixels to keep the system active."
+                >?</span
+              >
+            </label>
+            <input
+              type="number"
+              id="jiggleInterval"
+              value="60"
+              min="10"
+              step="10"
+            />
+          </div>
+          <button id="saveSettings" class="btn btn-small">Save Settings</button>
         </div>
-        <div class="setting-group">
-          <label for="jiggleInterval">Jiggle Interval (seconds):</label>
-          <input
-            type="number"
-            id="jiggleInterval"
-            value="60"
-            min="10"
-            step="10"
-          />
-        </div>
-        <button id="saveSettings" class="btn btn-small">Save Settings</button>
       </div>
 
       <div class="log-card">
