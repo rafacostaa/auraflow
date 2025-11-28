@@ -6,7 +6,7 @@
     "distDir": "../ui"
   },
   "package": {
-    "productName": "Coffee Jiggler",
+    "productName": "AuraFlow",
     "version": "0.1.0"
   },
   "tauri": {
@@ -26,7 +26,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.coffee.jiggler",
+      "identifier": "com.auraflow.app",
       "targets": "all"
     },
     "security": {
@@ -36,7 +36,7 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "Coffee Jiggler",
+        "title": "AuraFlow",
         "width": 500,
         "height": 400,
         "center": true

@@ -1,4 +1,4 @@
-# ☕ Coffee Jiggler
+# ✨ AuraFlow
 
 A smart, cross-platform mouse jiggler app built with Tauri (Rust + Web UI) that keeps your computer awake by automatically detecting idle time and moving the mouse.
 
@@ -35,8 +35,8 @@ A smart, cross-platform mouse jiggler app built with Tauri (Rust + Web UI) that 
 #### Steps
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/coffee-jiggler.git
-cd coffee-jiggler
+git clone https://github.com/rafacostaa/auraflow.git
+cd auraflow
 
 # Install dependencies
 npm install
@@ -52,7 +52,7 @@ The built app will be in `src-tauri/target/release/bundle/`
 
 ## Usage
 
-1. **Launch the app** - Open Coffee Jiggler
+1. **Launch the app** - Open AuraFlow
 2. **Configure settings** (optional):
    - **Idle Threshold**: How long to wait before starting (default: 120 seconds)
    - **Jiggle Interval**: How often to move the mouse when idle (default: 60 seconds)
@@ -69,7 +69,7 @@ The built app will be in `src-tauri/target/release/bundle/`
 
 ### Project Structure
 ```
-coffee-jiggler/
+auraflow/
 ├── src-tauri/          # Rust backend (mouse control logic)
 │   ├── src/
 │   │   └── main.rs     # Main Rust code
