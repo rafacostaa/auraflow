@@ -107,5 +107,34 @@ window.addEventListener('DOMContentLoaded', async () => {
         addLog('Using default settings');
     }
     
+    // Listen for events from backend
+    try {
+        const listen = window.__TAURI__.event.listen;
+        
+        // Listen for jiggler started event
+        listen('jiggler-started', () => {
+            addLog('Jiggler started from tray menu');
+            updateUI(true);
+        });
+        
+        // Listen for jiggler stopped event
+        listen('jiggler-stopped', () => {
+            addLog('Jiggler stopped from tray menu');
+            updateUI(false);
+        });
+        
+        // Listen for jiggle events
+        listen('jiggle', (event) => {
+            addLog(event.payload);
+        });
+        
+        // Listen for status events
+        listen('status', (event) => {
+            addLog(event.payload);
+        });
+    } catch (error) {
+        console.error('Failed to set up event listeners:', error);
+    }
+    
     addLog('AuraFlow ready!');
 });
