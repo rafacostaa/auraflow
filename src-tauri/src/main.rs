@@ -7,7 +7,9 @@ use rand::Rng;
 use std::sync::Arc;
 use std::thread;
 use std::time::{Duration, Instant};
-use tauri::State;
+use tauri::{CustomMenuItem, SystemTray, SystemTrayMenu, SystemTrayEvent, Manager, State, Icon};
+use image::io::Reader as ImageReader;
+use std::io::Cursor;
 
 struct JigglerState {
     is_running: Arc<Mutex<bool>>,
@@ -16,7 +18,7 @@ struct JigglerState {
 }
 
 #[tauri::command]
-fn start_jiggler(state: State<JigglerState>, window: tauri::Window) -> Result<String, String> {
+fn start_jiggler(state: State<JigglerState>, window: tauri::Window, app_handle: tauri::AppHandle) -> Result<String, String> {
     let mut running = state.is_running.lock();
     
     if *running {
@@ -25,6 +27,26 @@ fn start_jiggler(state: State<JigglerState>, window: tauri::Window) -> Result<St
     
     *running = true;
     drop(running);
+    
+    // Update system tray icon and status
+    let icon_bytes = include_bytes!("../icons/icon-active.png");
+    if let Ok(reader) = ImageReader::new(Cursor::new(icon_bytes)).with_guessed_format() {
+        if let Ok(img) = reader.decode() {
+            let rgba_data = img.to_rgba8().into_raw();
+            let icon = Icon::Rgba { 
+                rgba: rgba_data, 
+                width: img.width(), 
+                height: img.height() 
+            };
+            let _ = app_handle.tray_handle().set_icon(icon);
+        }
+    }
+    let _ = app_handle.tray_handle().get_item("status").set_title("Status: Running ✓");
+    let _ = app_handle.tray_handle().get_item("start").set_enabled(false);
+    let _ = app_handle.tray_handle().get_item("stop").set_enabled(true);
+    
+    // Notify all windows
+    let _ = app_handle.emit_all("jiggler-started", ());
     
     let is_running = Arc::clone(&state.is_running);
     let idle_threshold = Arc::clone(&state.idle_threshold);
@@ -87,9 +109,30 @@ fn start_jiggler(state: State<JigglerState>, window: tauri::Window) -> Result<St
 }
 
 #[tauri::command]
-fn stop_jiggler(state: State<JigglerState>) -> Result<String, String> {
+fn stop_jiggler(state: State<JigglerState>, app_handle: tauri::AppHandle) -> Result<String, String> {
     let mut running = state.is_running.lock();
     *running = false;
+    
+    // Update system tray icon and status
+    let icon_bytes = include_bytes!("../icons/icon.png");
+    if let Ok(reader) = ImageReader::new(Cursor::new(icon_bytes)).with_guessed_format() {
+        if let Ok(img) = reader.decode() {
+            let rgba_data = img.to_rgba8().into_raw();
+            let icon = Icon::Rgba { 
+                rgba: rgba_data, 
+                width: img.width(), 
+                height: img.height() 
+            };
+            let _ = app_handle.tray_handle().set_icon(icon);
+        }
+    }
+    let _ = app_handle.tray_handle().get_item("status").set_title("Status: Stopped");
+    let _ = app_handle.tray_handle().get_item("start").set_enabled(true);
+    let _ = app_handle.tray_handle().get_item("stop").set_enabled(false);
+    
+    // Notify all windows
+    let _ = app_handle.emit_all("jiggler-stopped", ());
+    
     Ok("Jiggler stopped".to_string())
 }
 
@@ -111,6 +154,21 @@ fn update_settings(
     Ok("Settings updated".to_string())
 }
 
+#[tauri::command]
+fn update_tray_menu(app_handle: tauri::AppHandle, running: bool) -> Result<String, String> {
+    let tray = app_handle.tray_handle();
+    if running {
+        let _ = tray.get_item("start").set_enabled(false);
+        let _ = tray.get_item("stop").set_enabled(true);
+        let _ = tray.get_item("status").set_title("Status: Running ✓");
+    } else {
+        let _ = tray.get_item("start").set_enabled(true);
+        let _ = tray.get_item("stop").set_enabled(false);
+        let _ = tray.get_item("status").set_title("Status: Stopped");
+    }
+    Ok("Tray menu updated".to_string())
+}
+
 fn main() {
     let state = JigglerState {
         is_running: Arc::new(Mutex::new(false)),
@@ -118,13 +176,66 @@ fn main() {
         jiggle_interval: Arc::new(Mutex::new(60)),
     };
     
+    // Create system tray menu
+    let start = CustomMenuItem::new("start".to_string(), "Start Jiggler");
+    let stop = CustomMenuItem::new("stop".to_string(), "Stop Jiggler").disabled();
+    let show = CustomMenuItem::new("show".to_string(), "Show Window");
+    let hide = CustomMenuItem::new("hide".to_string(), "Hide Window");
+    let status = CustomMenuItem::new("status".to_string(), "Status: Stopped").disabled();
+    let quit = CustomMenuItem::new("quit".to_string(), "Quit");
+    
+    let tray_menu = SystemTrayMenu::new()
+        .add_item(status)
+        .add_native_item(tauri::SystemTrayMenuItem::Separator)
+        .add_item(start)
+        .add_item(stop)
+        .add_native_item(tauri::SystemTrayMenuItem::Separator)
+        .add_item(show)
+        .add_item(hide)
+        .add_native_item(tauri::SystemTrayMenuItem::Separator)
+        .add_item(quit);
+    
+    let system_tray = SystemTray::new().with_menu(tray_menu);
+    
     tauri::Builder::default()
         .manage(state)
+        .system_tray(system_tray)
+        .on_system_tray_event(|app, event| match event {
+            SystemTrayEvent::MenuItemClick { id, .. } => {
+                let app_handle = app.app_handle();
+                match id.as_str() {
+                    "start" => {
+                        let window = app.get_window("main").unwrap();
+                        let state: tauri::State<JigglerState> = app_handle.state();
+                        let _ = start_jiggler(state, window.clone(), app_handle.clone());
+                    }
+                    "stop" => {
+                        let state: tauri::State<JigglerState> = app_handle.state();
+                        let _ = stop_jiggler(state, app_handle.clone());
+                    }
+                    "show" => {
+                        let window = app.get_window("main").unwrap();
+                        window.show().unwrap();
+                        window.set_focus().unwrap();
+                    }
+                    "hide" => {
+                        let window = app.get_window("main").unwrap();
+                        window.hide().unwrap();
+                    }
+                    "quit" => {
+                        std::process::exit(0);
+                    }
+                    _ => {}
+                }
+            }
+            _ => {}
+        })
         .invoke_handler(tauri::generate_handler![
             start_jiggler,
             stop_jiggler,
             get_settings,
-            update_settings
+            update_settings,
+            update_tray_menu
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

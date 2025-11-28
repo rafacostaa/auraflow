@@ -37,7 +37,8 @@
       "csp": null
     },
     "systemTray": {
-      "iconPath": "icons/icon.png"
+      "iconPath": "icons/icon.png",
+      "iconAsTemplate": true
     },
     "windows": [
       {
