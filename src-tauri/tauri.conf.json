@@ -12,6 +12,10 @@
   "tauri": {
     "allowlist": {
       "all": false,
+      "dialog": {
+        "all": false,
+        "message": true
+      },
       "shell": {
         "all": false,
         "open": true
@@ -32,14 +36,19 @@
     "security": {
       "csp": null
     },
+    "systemTray": {
+      "iconPath": "icons/icon.png"
+    },
     "windows": [
       {
         "fullscreen": false,
         "resizable": true,
         "title": "AuraFlow",
-        "width": 500,
-        "height": 400,
-        "center": true
+        "width": 600,
+        "height": 750,
+        "center": true,
+        "decorations": true,
+        "alwaysOnTop": false
       }
     ]
   }

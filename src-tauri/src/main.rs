@@ -3,10 +3,11 @@
 
 use enigo::{Enigo, Mouse, Settings};
 use parking_lot::Mutex;
+use rand::Rng;
 use std::sync::Arc;
 use std::thread;
 use std::time::{Duration, Instant};
-use tauri::{Manager, State};
+use tauri::State;
 
 struct JigglerState {
     is_running: Arc<Mutex<bool>>,
@@ -61,8 +62,9 @@ fn start_jiggler(state: State<JigglerState>, window: tauri::Window) -> Result<St
                 }
                 
                 // Perform jiggle
-                let x_offset = (rand::random::<i32>() % 10) - 5;
-                let y_offset = (rand::random::<i32>() % 10) - 5;
+                let mut rng = rand::thread_rng();
+                let x_offset = rng.gen_range(-5..=5);
+                let y_offset = rng.gen_range(-5..=5);
                 
                 let _ = enigo.move_mouse(x_offset, y_offset, enigo::Coordinate::Rel);
                 
